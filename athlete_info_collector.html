@@ -1,0 +1,101 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Photoshoot Delivery Registration</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    input, button { padding: 10px; margin: 5px; font-size: 16px; }
+    table { border-collapse: collapse; width: 100%; margin-top: 20px; }
+    th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+    th { background-color: #f2f2f2; }
+    .admin-panel { display: none; margin-top: 10px; border: 1px solid #ddd; padding: 10px; background: #f9f9f9; }
+  </style>
+</head>
+<body>
+  <h2>Photoshoot Delivery Registration</h2>
+  <form id="athleteForm">
+    <input type="text" id="name" placeholder="Athlete Name" required />
+    <input type="text" id="team" placeholder="Team" required />
+    <input type="email" id="email" placeholder="Email Address" required />
+    <button type="submit">Add Athlete</button>
+  </form>
+  
+  <button id="adminBtn" onclick="showAdminPrompt()">Admin Access</button>
+
+  <div class="admin-panel" id="adminPanel">
+    <button onclick="copyEmails()">Copy All Emails</button>
+    <button onclick="clearData()">Clear All Data</button>
+    <button onclick="closeAdmin()">Close Admin Panel</button>
+  </div>
+
+  <table id="athleteTable">
+    <thead>
+      <tr><th>Name</th><th>Team</th><th>Email</th></tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <script>
+    const form = document.getElementById('athleteForm');
+    const tableBody = document.querySelector('#athleteTable tbody');
+    const adminPanel = document.getElementById('adminPanel');
+    let athletes = JSON.parse(localStorage.getItem('athletes') || '[]');
+
+    function renderTable() {
+      tableBody.innerHTML = '';
+      athletes.forEach(a => {
+        const row = document.createElement('tr');
+        row.innerHTML = `<td>${a.name}</td><td>${a.team}</td><td>${a.email}</td>`;
+        tableBody.appendChild(row);
+      });
+    }
+
+    form.addEventListener('submit', function(event) {
+      event.preventDefault();
+      const name = document.getElementById('name').value;
+      const team = document.getElementById('team').value;
+      const email = document.getElementById('email').value;
+      athletes.push({ name, team, email });
+      localStorage.setItem('athletes', JSON.stringify(athletes));
+      renderTable();
+      form.reset();
+    });
+
+    function copyEmails() {
+      const emails = athletes.map(a => a.email).join(', ');
+      navigator.clipboard.writeText(emails).then(() => {
+        alert("Emails copied to clipboard.");
+      });
+    }
+
+    function clearData() {
+      if (confirm("Are you sure you want to clear all data?")) {
+        if (confirm("Are you really sure? This cannot be undone.")) {
+          localStorage.removeItem('athletes');
+          athletes = [];
+          renderTable();
+          alert("All data cleared.");
+        }
+      }
+    }
+
+    function showAdminPrompt() {
+      const code = prompt("Enter admin PIN:");
+      if (code === "1003") {
+        adminPanel.style.display = "block";
+      } else {
+        alert("Incorrect PIN");
+      }
+    }
+
+    function closeAdmin() {
+      adminPanel.style.display = "none";
+    }
+
+    renderTable();
+  </script>
+</body>
+</html>
